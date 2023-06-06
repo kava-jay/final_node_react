@@ -1,0 +1,56 @@
+version: '3'
+
+services:
+  frontend:
+    build: ./trainee_frontend
+    container_name: react-ui
+    restart: always
+    ports: 
+      - "5001:3000"
+    environment:
+      - REACT_APP_BACKEND_URL= http://backend:5000/ 
+     
+    stdin_open: true
+    tty: true
+    depends_on:
+      - backend
+    networks:
+      - react-express 
+
+  backend:
+    build: ./trainee_backend
+    container_name: node-api
+    restart: always
+    ports: 
+      - "5000:5000"
+    env_file: ./trainee_backend/.env
+    # environment:
+    #   - DB_URL= mongodb://127.0.0.1:27017/
+    #   - PORT=5000
+    depends_on:
+      - database
+    networks:
+      - express-mongo
+      - react-express
+
+  database:
+    image: mongo
+    container_name: mongo-db
+    restart: always 
+    ports:
+      - "27017:27017"
+    # environment:
+    #   # - MONGODB_URI: mongodb://localhost:27017/mernDB
+    #   - MONGODB_URI=mongodb://mongo-db:27017/
+    #   - MONGO_INITDB_ROOT_USERNAME=root
+    #   - MONGO_INITDB_ROOT_PASSWORD=mypass
+    #   - MONGO_INITDB_DATABASE=mernDB
+    networks:
+      - express-mongo
+    volumes:
+      - /home/jay/mongodb-database-backup:/data/db
+
+networks:
+  react-express:
+  express-mongo:
+    driver: bridge
